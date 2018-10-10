@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 
 get_data = 0
-show_data = 1
+show_data = 0
 '''
 Response
 dict_keys(['AffiliateFilterValues', 'DisplayNation', 'Workouts', 
@@ -30,11 +30,28 @@ csv_headers = ['Name', 'WOD 1', 'WOD 2', 'WOD 3']
 workout_key_map = {'workout_5605' : 'WOD 1', 
 				   'workout_5606' : 'WOD 2', 
 				   'workout_5607' : 'WOD 3'}
-wza_divison_names = ['elite_men', 'elite_women', 'int_men', 'int_women']
 wza_division_urls = {'elite_men': 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/male_5031/json?', 
 					 'elite_women': 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/female_5809/json?', 
 					 'int_men': 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/male_5032/json?', 
-					 'int_women' : 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/female_5810/json?'}
+					 'int_women' : 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/female_5810/json?',
+					 'mast_men_35': 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/male_5033/json?',
+					 'mast_women_35': 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/female_5811/json?',
+					 'mast_men_40': 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/male_5034/json?',
+					 'mast_women_40': 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/female_5812/json?',
+					 'mast_men_45': 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/male_5041/json?',
+					 'mast_women_45': 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/female_5813/json?',
+					 'mast_men_50' : 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/male_5035/json?',
+					 'mast_women_50': 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/female_5814/json?',
+					 'mast_men_55' : 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/male_6373/json?',
+					 'mast_women_55' : 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/female_6372/json?',
+#					 'adapt_stand_men' : 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/male_5038/json?',
+#					 'adapt_stand_women' : 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/female_5923/json?',
+#					 'adapt_seated_men' : 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/male_5039/json?',
+#					 'adapt_seated_women' : 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/female_5924/json?',
+					 'teen_13_boys' : 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/male_5036/json?',
+					 'teen_13_girls' : 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/female_5815/json?',
+					 'teen_16_boys' : 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/male_5037/json?',
+					 'teen_16_girls' : 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/female_5816/json?'}
 
 def plot_workout_1(wod1, division):
 	wod1.hist(grid=True, bins='auto', rwidth=0.9, color='#607c8e')
@@ -76,7 +93,7 @@ def get_workout_result(ath_scores):
 		if workout_json['Res'] == '' or workout_json['Res'] == '-':
 			res = 0
 		elif workout_name == 'workout_5605':
-			# translate time to seconds for easier math
+			# translate time to seconds
 			time = workout_json['Res'].split('<span>')[0]
 			if ':' in time:
 				minutes = time.split(':')[0]
@@ -84,12 +101,10 @@ def get_workout_result(ath_scores):
 				res = float(minutes) * 60 + float(seconds)
 			else:
 				res = float(0)
-		elif workout_name == 'workout_5606':
-			# number of reps
+		elif workout_name == 'workout_5606' or \
+			 workout_name == 'workout_5607':
 			res = float(workout_json['Res'].split('<span>')[0])
-		elif workout_name == 'workout_5607':
-			# weight
-			res = float(workout_json['Res'].split('<span>')[0])
+		
 		workout_result[workout_key_map[workout_name]] = res
 	return workout_result
 
@@ -127,9 +142,14 @@ if __name__ == '__main__':
 	if get_data:
 		get_all_results()
 	
-	# viz data
-	if show_data:
-		for division in wza_divison_names:
+	with open('aggregate.csv', 'w', newline='') as csvfile:
+		headers = ['division', 'wod 1 mean', 'wod 1 min', 'wod 1 max', \
+					'wod 2 mean', 'wod 2 min', 'wod 2 max', \
+					'wod 3 mean', 'wod 3 min', 'wod 3 max']
+		writer = csv.DictWriter(csvfile, fieldnames=headers)
+		writer.writeheader()
+		
+		for division in wza_division_urls.keys():
 			wza_data = pd.read_csv('{}.csv'.format(division), sep=',', header=0)
 			# remove 0 scores
 			wod1 = wza_data.loc[:,csv_headers[1]]
@@ -138,6 +158,33 @@ if __name__ == '__main__':
 			wod1 = wod1[wod1 > 0]
 			wod2 = wod2[wod2 > 0]
 			wod3 = wod3[wod3 > 0]
-			plot_workout_1(wod1, division)
-			plot_workout_2(wod2, division)
-			plot_workout_3(wod3, division)
+			# save data to csv
+			row_data = {}
+			row_data[headers[0]] = division
+			row_data[headers[1]] = "{:02d}:{:02d}".format(int(wod1.mean()//60), int(wod1.mean()%60))
+			row_data[headers[2]] = "{:02d}:{:02d}".format(int(wod1.min()//60), int(wod1.min()%60))
+			row_data[headers[3]] = "{:02d}:{:02d}".format(int(wod1.max()//60), int(wod1.max()%60))
+			row_data[headers[4]] = wod2.mean()
+			row_data[headers[5]] = wod2.min()
+			row_data[headers[6]] = wod2.max()
+			row_data[headers[7]] = wod3.mean()
+			row_data[headers[8]] = wod3.min()
+			row_data[headers[9]] = wod3.max()
+			writer.writerow(row_data)
+
+
+			print(division)
+			print('-------------')
+			print(wod1.describe())
+			print('\n')
+			print(wod2.describe())
+			print('\n')
+			print(wod3.describe())
+			print('\n')
+			
+			if show_data:
+				plot_workout_1(wod1, division)
+				plot_workout_2(wod2, division)
+				plot_workout_3(wod3, division)
+	
+	
