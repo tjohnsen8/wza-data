@@ -23,13 +23,16 @@ key name : {... 'Res': result ...}
 'workout_5606': wod2 num reps
 'workout_5605': wod1 time
 'workout_5607': wod3 weight
+'workout_5608': wod4 num reps
+'workout_5609': wod5 num reps
 '''
 
-workout_key_list = ['workout_5605', 'workout_5606', 'workout_5607']
-csv_headers = ['Name', 'WOD 1', 'WOD 2', 'WOD 3']
+csv_headers = ['Name', 'WOD 1', 'WOD 2', 'WOD 3', 'WOD 4', 'WOD 5']
 workout_key_map = {'workout_5605' : 'WOD 1', 
 				   'workout_5606' : 'WOD 2', 
-				   'workout_5607' : 'WOD 3'}
+				   'workout_5607' : 'WOD 3',
+				   'workout_5608' : 'WOD 4',
+				   'workout_5609' : 'WOD 5'}
 wza_division_urls = {'elite_men': 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/male_5031/json?', 
 					 'elite_women': 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/female_5809/json?', 
 					 'int_men': 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/male_5032/json?', 
@@ -66,24 +69,14 @@ def plot_workout_1(wod1, division):
 	plt.title('wza wod1 {}'.format(division))
 	plt.show()
 
-def plot_workout_2(wod2, division):
-	wod2.hist(grid=True, bins=48, rwidth=0.9, color='#607c8e')
-	plt.text(33, 50, wod2.describe())
-	#wod3.hist(grid=True, bins=20, rwidth=0.9, color='#607c8e')
-	#plt.text(300, 80, wod3.describe())
+
+def plot_reps_workout(wod, num, division):
+	wod.hist(grid=True, bins='auto', rwidth=0.9, color='#607c8e')
+	text_x = wod.max()*.8
+	plt.text(text_x, 50, wod.describe())
 	plt.xlabel('reps')
 	plt.ylabel('frequency')
-	plt.title('wza wod2 {}'.format(division))
-	#wod3.hist(bins=50)
-	plt.show()
-
-def plot_workout_3(wod3, division):
-	wod3.hist(grid=True, bins=20, rwidth=0.9, color='#607c8e')
-	plt.text(300, 80, wod3.describe())
-	plt.xlabel('weight')
-	plt.ylabel('frequency')
-	plt.title('wza wod3 {}'.format(division))
-	#wod3.hist(bins=50)
+	plt.title('wza wod{} {}'.format(num, division))
 	plt.show()
 
 def get_workout_result(ath_scores):
@@ -102,7 +95,9 @@ def get_workout_result(ath_scores):
 			else:
 				res = float(0)
 		elif workout_name == 'workout_5606' or \
-			 workout_name == 'workout_5607':
+			 workout_name == 'workout_5607' or \
+			 workout_name == 'workout_5608' or \
+			 workout_name == 'workout_5609' :
 			res = float(workout_json['Res'].split('<span>')[0])
 		
 		workout_result[workout_key_map[workout_name]] = res
@@ -114,11 +109,6 @@ def get_data_from_leaderboard(division, url):
 	json_data = response.json()
 	with open('{}.json'.format(division), 'w') as outfile:
 		json.dump(json_data, outfile)
-	return json_data
-
-def get_data_from_file():
-	with open('wzadata.json', 'r') as infile:
-		json_data = json.load(infile)
 	return json_data
 
 def write_data_to_csv(division, athletes):
@@ -145,7 +135,9 @@ if __name__ == '__main__':
 	with open('aggregate.csv', 'w', newline='') as csvfile:
 		headers = ['division', 'wod 1 mean', 'wod 1 min', 'wod 1 max', \
 					'wod 2 mean', 'wod 2 min', 'wod 2 max', \
-					'wod 3 mean', 'wod 3 min', 'wod 3 max']
+					'wod 3 mean', 'wod 3 min', 'wod 3 max', \
+					'wod 4 mean', 'wod 4 min', 'wod 4 max', \
+					'wod 5 mean', 'wod 5 min', 'wod 5 max']
 		writer = csv.DictWriter(csvfile, fieldnames=headers)
 		writer.writeheader()
 		
@@ -155,9 +147,13 @@ if __name__ == '__main__':
 			wod1 = wza_data.loc[:,csv_headers[1]]
 			wod2 = wza_data.loc[:,csv_headers[2]]
 			wod3 = wza_data.loc[:,csv_headers[3]]
+			wod4 = wza_data.loc[:,csv_headers[4]]
+			wod5 = wza_data.loc[:,csv_headers[5]]
 			wod1 = wod1[wod1 > 0]
 			wod2 = wod2[wod2 > 0]
 			wod3 = wod3[wod3 > 0]
+			wod4 = wod4[wod4 > 0]
+			wod5 = wod5[wod5 > 0]
 			# save data to csv
 			row_data = {}
 			row_data[headers[0]] = division
@@ -170,6 +166,12 @@ if __name__ == '__main__':
 			row_data[headers[7]] = wod3.mean()
 			row_data[headers[8]] = wod3.min()
 			row_data[headers[9]] = wod3.max()
+			row_data[headers[10]] = wod4.mean()
+			row_data[headers[11]] = wod4.min()
+			row_data[headers[12]] = wod4.max()
+			row_data[headers[13]] = wod5.mean()
+			row_data[headers[14]] = wod5.min()
+			row_data[headers[15]] = wod5.max()
 			writer.writerow(row_data)
 
 
@@ -181,10 +183,16 @@ if __name__ == '__main__':
 			print('\n')
 			print(wod3.describe())
 			print('\n')
+			print(wod4.describe())
+			print('\n')
+			print(wod5.describe())
+			print('\n')
 			
 			if show_data:
 				plot_workout_1(wod1, division)
-				plot_workout_2(wod2, division)
-				plot_workout_3(wod3, division)
+				plot_reps_workout(wod2, 2, division)
+				plot_reps_workout(wod3, 3, division)
+				plot_reps_workout(wod4, 4, division)
+				plot_reps_workout(wod5, 5, division)
 	
 	
