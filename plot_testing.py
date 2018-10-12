@@ -1,12 +1,13 @@
 from matplotlib import pyplot
 import pandas as pd
 import csv
+from wza_data import data_dir
 
 wod_headers = ['WOD 1', 'WOD 2', 'WOD 3']#, 'WOD 4', 'WOD 5']
 
 # get the two divisons i want
-elite = pd.read_csv('elite_men.csv', sep=',', header=0)
-interm = pd.read_csv('int_men.csv', sep=',', header=0)
+elite = pd.read_csv(f'{data_dir}elite_men.csv', sep=',', header=0)
+interm = pd.read_csv(f'{data_dir}int_men.csv', sep=',', header=0)
 
 # get the workout data
 elite_res = []
@@ -22,7 +23,7 @@ for ind in range(0, len(wod_headers)):
 
 # now plot the wods
 for ind in range(0, len(wod_headers)):
-	pyplot.hist(elite_res[ind], bins='auto', alpha=0.9, label='elite\n{}'.format(elite_res[ind].describe()))
-	pyplot.hist(int_res[ind], bins='auto', alpha=0.9, label='int\n{}'.format(int_res[ind].describe()))
+	pyplot.hist(elite_res[ind], bins='auto', alpha=0.9, label=f'elite\n{elite_res[ind].describe()}')
+	pyplot.hist(int_res[ind], bins='auto', alpha=0.9, label=f'int\n{int_res[ind].describe()}')
 	pyplot.legend(loc='upper right')
 	pyplot.show()
