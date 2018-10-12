@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 
+data_dir = './data/'
 get_data = 0
 show_data = 0
 '''
@@ -60,13 +61,13 @@ def plot_workout_1(wod1, division):
 	wod1.hist(grid=True, bins='auto', rwidth=0.9, color='#607c8e')
 	plt.text(1000, 80, wod1.describe())
 	def fmtsec(x,pos):
-		return "{:02d}:{:02d}".format(int(x//60), int(x%60))
+		return f"{int(x//60):02d}:{int(x%60):02d}"
 	plt.gca().xaxis.set_major_formatter(mticker.FuncFormatter(fmtsec))
 	# Use nice tick positions as multiples of 30 seconds
 	plt.gca().xaxis.set_major_locator(mticker.MultipleLocator(60))
 	plt.xlabel('time')
 	plt.ylabel('frequency')
-	plt.title('wza wod1 {}'.format(division))
+	plt.title(f'wza wod1 {division}')
 	plt.show()
 
 
@@ -76,7 +77,7 @@ def plot_reps_workout(wod, num, division):
 	plt.text(text_x, 50, wod.describe())
 	plt.xlabel('reps')
 	plt.ylabel('frequency')
-	plt.title('wza wod{} {}'.format(num, division))
+	plt.title(f'wza wod{num} {division}')
 	plt.show()
 
 def get_workout_result(ath_scores):
@@ -107,12 +108,12 @@ def get_data_from_leaderboard(division, url):
 	# get updated data from website
 	response = requests.get(url)
 	json_data = response.json()
-	with open('{}.json'.format(division), 'w') as outfile:
+	with open(f'{division}.json', 'w') as outfile:
 		json.dump(json_data, outfile)
 	return json_data
 
 def write_data_to_csv(division, athletes):
-	with open('{}.csv'.format(division), 'w', newline='', encoding='utf-8') as csvfile:
+	with open(f'{data_dir}{division}.csv', 'w', newline='', encoding='utf-8') as csvfile:
 			writer = csv.DictWriter(csvfile, fieldnames=csv_headers)
 			writer.writeheader()
 			for athlete in athletes:
@@ -132,7 +133,7 @@ if __name__ == '__main__':
 	if get_data:
 		get_all_results()
 	
-	with open('aggregate.csv', 'w', newline='') as csvfile:
+	with open('{}aggregate.csv', 'w', newline='') as csvfile:
 		headers = ['division', 'wod 1 mean', 'wod 1 min', 'wod 1 max', \
 					'wod 2 mean', 'wod 2 min', 'wod 2 max', \
 					'wod 3 mean', 'wod 3 min', 'wod 3 max', \
@@ -142,7 +143,7 @@ if __name__ == '__main__':
 		writer.writeheader()
 		
 		for division in wza_division_urls.keys():
-			wza_data = pd.read_csv('{}.csv'.format(division), sep=',', header=0)
+			wza_data = pd.read_csv(f'{division}.csv', sep=',', header=0)
 			# remove 0 scores
 			wod1 = wza_data.loc[:,csv_headers[1]]
 			wod2 = wza_data.loc[:,csv_headers[2]]
@@ -157,9 +158,15 @@ if __name__ == '__main__':
 			# save data to csv
 			row_data = {}
 			row_data[headers[0]] = division
-			row_data[headers[1]] = "{:02d}:{:02d}".format(int(wod1.mean()//60), int(wod1.mean()%60))
-			row_data[headers[2]] = "{:02d}:{:02d}".format(int(wod1.min()//60), int(wod1.min()%60))
-			row_data[headers[3]] = "{:02d}:{:02d}".format(int(wod1.max()//60), int(wod1.max()%60))
+			wod1mins = int(wod1.mean()//60)
+			wod1secs = int(wod1.mean()%60)
+			row_data[headers[1]] = f"{wod1mins:02d}:{wod1secs:02d}"
+			wod1mins = int(wod1.min()//60)
+			wod1secs = int(wod1.min()%60)
+			row_data[headers[2]] = f"{wod1mins:02d}:{wod1secs:02d}"
+			wod1mins = int(wod1.max()//60)
+			wod1secs = int(wod1.max()%60)
+			row_data[headers[3]] = f"{wod1mins:02d}:{wod1secs:02d}"
 			row_data[headers[4]] = wod2.mean()
 			row_data[headers[5]] = wod2.min()
 			row_data[headers[6]] = wod2.max()
