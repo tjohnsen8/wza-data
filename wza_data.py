@@ -108,7 +108,7 @@ def get_data_from_leaderboard(division, url):
 	# get updated data from website
 	response = requests.get(url)
 	json_data = response.json()
-	with open(f'{division}.json', 'w') as outfile:
+	with open(f'{data_dir}{division}.json', 'w') as outfile:
 		json.dump(json_data, outfile)
 	return json_data
 
@@ -133,7 +133,7 @@ if __name__ == '__main__':
 	if get_data:
 		get_all_results()
 	
-	with open('{}aggregate.csv', 'w', newline='') as csvfile:
+	with open(f'{data_dir}aggregate.csv', 'w', newline='') as csvfile:
 		headers = ['division', 'wod 1 mean', 'wod 1 min', 'wod 1 max', \
 					'wod 2 mean', 'wod 2 min', 'wod 2 max', \
 					'wod 3 mean', 'wod 3 min', 'wod 3 max', \
@@ -143,7 +143,7 @@ if __name__ == '__main__':
 		writer.writeheader()
 		
 		for division in wza_division_urls.keys():
-			wza_data = pd.read_csv(f'{division}.csv', sep=',', header=0)
+			wza_data = pd.read_csv(f'{data_dir}{division}.csv', sep=',', header=0)
 			# remove 0 scores
 			wod1 = wza_data.loc[:,csv_headers[1]]
 			wod2 = wza_data.loc[:,csv_headers[2]]
