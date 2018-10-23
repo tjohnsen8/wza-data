@@ -28,12 +28,14 @@ key name : {... 'Res': result ...}
 'workout_5609': wod5 num reps
 '''
 
-csv_headers = ['Name', 'WOD 1', 'WOD 2', 'WOD 3', 'WOD 4', 'WOD 5']
+csv_headers = ['Name', 'WOD 1', 'WOD 2', 'WOD 3', 'WOD 4', 'WOD 5', 'WOD 6', 'WOD 7']
 workout_key_map = {'workout_5605' : 'WOD 1', 
 				   'workout_5606' : 'WOD 2', 
 				   'workout_5607' : 'WOD 3',
 				   'workout_5608' : 'WOD 4',
-				   'workout_5609' : 'WOD 5'}
+				   'workout_5609' : 'WOD 5',
+				   'workout_5610' : 'WOD 6',
+				   'workout_5611' : 'WOD 7'}
 wza_division_urls = {'elite_men': 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/male_5031/json?', 
 					 'elite_women': 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/female_5809/json?', 
 					 'int_men': 'https://qualifier.wodapalooza.com/events/1244/results/scoring-group/male_5032/json?', 
@@ -98,8 +100,11 @@ def get_workout_result(ath_scores):
 		elif workout_name == 'workout_5606' or \
 			 workout_name == 'workout_5607' or \
 			 workout_name == 'workout_5608' or \
-			 workout_name == 'workout_5609' :
+			 workout_name == 'workout_5609' or \
+			 workout_name == 'workout_5611':
 			res = float(workout_json['Res'].split('<span>')[0])
+		elif workout_name == 'workout_5610':
+			res = float(workout_json['Res'])
 		
 		workout_result[workout_key_map[workout_name]] = res
 	return workout_result
@@ -138,7 +143,9 @@ if __name__ == '__main__':
 					'wod 2 mean', 'wod 2 min', 'wod 2 max', \
 					'wod 3 mean', 'wod 3 min', 'wod 3 max', \
 					'wod 4 mean', 'wod 4 min', 'wod 4 max', \
-					'wod 5 mean', 'wod 5 min', 'wod 5 max']
+					'wod 5 mean', 'wod 5 min', 'wod 5 max', \
+					'wod 6 mean', 'wod 6 min', 'wod 6 max', \
+					'wod 7 mean', 'wod 7 min', 'wod 7 max']
 		writer = csv.DictWriter(csvfile, fieldnames=headers)
 		writer.writeheader()
 		
@@ -150,11 +157,15 @@ if __name__ == '__main__':
 			wod3 = wza_data.loc[:,csv_headers[3]]
 			wod4 = wza_data.loc[:,csv_headers[4]]
 			wod5 = wza_data.loc[:,csv_headers[5]]
+			wod6 = wza_data.loc[:,csv_headers[6]]
+			wod7 = wza_data.loc[:,csv_headers[7]]
 			wod1 = wod1[wod1 > 0]
 			wod2 = wod2[wod2 > 0]
 			wod3 = wod3[wod3 > 0]
 			wod4 = wod4[wod4 > 0]
 			wod5 = wod5[wod5 > 0]
+			wod6 = wod6[wod6 > 0]
+			wod7 = wod7[wod7 > 0]
 			# save data to csv
 			row_data = {}
 			row_data[headers[0]] = division
@@ -179,6 +190,12 @@ if __name__ == '__main__':
 			row_data[headers[13]] = wod5.mean()
 			row_data[headers[14]] = wod5.min()
 			row_data[headers[15]] = wod5.max()
+			row_data[headers[16]] = wod6.mean()
+			row_data[headers[17]] = wod6.min()
+			row_data[headers[18]] = wod6.max()
+			row_data[headers[19]] = wod7.mean()
+			row_data[headers[20]] = wod7.min()
+			row_data[headers[21]] = wod7.max()
 			writer.writerow(row_data)
 
 
@@ -193,6 +210,10 @@ if __name__ == '__main__':
 			print(wod4.describe())
 			print('\n')
 			print(wod5.describe())
+			print('\n')
+			print(wod6.describe())
+			print('\n')
+			print(wod7.describe())
 			print('\n')
 			
 			if show_data:

@@ -2,8 +2,10 @@ import json
 import csv
 from wza_data import write_data_to_csv
 
+data_dir = './data/'
+
 def get_json_data(division):
-	with open('{}.json'.format(division)) as jsonfile:
+	with open(f'{data_dir}{division}.json') as jsonfile:
 		json_data = json.load(jsonfile)
 	return json_data
 
@@ -27,7 +29,7 @@ def do_scaled():
 					break
 
 		if len(scaled_aths) > 0:
-			write_data_to_csv('{}_scaled'.format(division), scaled_aths)
+			write_data_to_csv(f'{division}_scaled', scaled_aths)
 
 if __name__ == '__main__':
 	do_scaled()

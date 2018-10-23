@@ -3,7 +3,7 @@ import pandas as pd
 import csv
 from wza_data import data_dir
 
-wod_headers = ['WOD 1', 'WOD 2', 'WOD 3']#, 'WOD 4', 'WOD 5']
+wod_headers = ['WOD 1', 'WOD 2', 'WOD 3', 'WOD 4', 'WOD 5', 'WOD 6', 'WOD 7']
 
 # get the two divisons i want
 elite = pd.read_csv(f'{data_dir}elite_men.csv', sep=',', header=0)
